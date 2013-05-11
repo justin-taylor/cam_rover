@@ -1,0 +1,5 @@
+android/bin/*
+android/gen/*
+android/local.properties
+.classpath
+.swp
