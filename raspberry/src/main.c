@@ -31,8 +31,11 @@ void errorExit(char *errorMessage)
 }
 
 
+
+
 /**
- * Initializes the local socket for receiving data
+ * Initializes the local socket for receiving data. If an error occurs the
+ * program will exit.
  *
  * @param port the port to bind too
  *
@@ -67,6 +70,53 @@ int setup_incoming_socket(int port)
 
 
 
+
+/**
+ * Receives data from the socket and stores the result in buffer. If an error
+ * occurs the program will exit
+ *
+ * @return the number of bytes read from the socket
+ */
+int receive_message(int socket, char *buffer, struct sockaddr *client)
+{
+	unsigned int clientlen;
+	clientlen = sizeof(client);
+	int received = recvfrom(socket, buffer, BUFFER_SIZE, 0, client, &clientlen);
+	if (received  < 0)
+	{
+		errorExit("Failed to receive message");
+	}	
+
+	return received;
+}
+
+
+/**
+ * Handles messages received from the socket by reading the message values and
+ * executing functions depending on the values.
+ *
+ * @param message the data received from the incoming socket
+ * @param message_length the number of bytes in the message parameter
+ * @param response the location to store the response to the message
+ *
+ * @return the number of bytes stored in the response
+ */
+int process_message(char *message, int message_length, char *response)
+{
+	//TODO
+	int i = 0;
+	for(i; i < message_length; i++)
+	{
+		char c = message[i];
+		// for now just echo the message back
+		response[i] = c;
+	}
+
+	return message_length;
+}
+
+
+
 int main(int argc, char *argv[])
 {
 	if (argc != 2)
@@ -76,35 +126,27 @@ int main(int argc, char *argv[])
 	}
 
 
+	//setup the incoming socket
 	int port = atoi(argv[1]);
 	int socket = setup_incoming_socket(port);
 
-	struct sockaddr_in echoclient;
-	char buffer[BUFFER_SIZE];
-	unsigned int echolen, clientlen;
-	int received = 0;
-	clientlen = sizeof(echoclient);
+	struct sockaddr_in client;
+	char buffer[BUFFER_SIZE], process[BUFFER_SIZE];
+	int received, process_len;
 
 	/* Run until cancelled */
 	while (1)
 	{
-		/* Receive a message from the client */
-		received = recvfrom(socket, buffer, BUFFER_SIZE, 0, (struct sockaddr *) &echoclient, &clientlen);
-		if (received  < 0)
-		{
-			errorExit("Failed to receive message");
-		}
+		received = receive_message(socket, buffer, (struct sockaddr *) &client);
+		process_len = process_message(buffer, received, process);
 
-		//TODO process message
+		int size = sizeof(client);
+		int sent = sendto(socket, buffer, received, 0, (struct sockaddr *) &client, size);
 
-
-		fprintf(stderr, "Client connected: %s\n", inet_ntoa(echoclient.sin_addr));
-
-		// TODO update to ACK
 		/* Send the message back to client */
-		if (sendto(socket, buffer, received, 0, (struct sockaddr *) &echoclient, sizeof(echoclient)) != received)
+		if (sent != received)
 		{
-			errorExit("Mismatch in number of echo'd bytes");
+			errorExit("Could not respond to client");
 		}
 	}
 
