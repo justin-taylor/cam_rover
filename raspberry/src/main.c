@@ -15,8 +15,104 @@
 #include <sys/types.h>
 #include <sys/socket.h>
 
+#include <wiringPi.h>
+#include <softPwm.h>
+
 #define BUFFER_SIZE 512
 
+
+#define MOTOR_CONTROLLER_SPEED_PIN 7 //physical pin 7
+#define MOTOR_CONTROLLER_DXA_PIN 8 // physical pin 3
+#define MOTOR_CONTROLLER_DXB_PIN 9 //physical pin 5
+#define SERVO_PWN_PIN 0 //physical pin 11
+
+/**
+ * Handles messages received from the socket by reading the message values and
+ * executing functions depending on the values.
+ *
+ * @param message the data received from the incoming socket
+ * @param message_length the number of bytes in the message parameter
+ * @param response the location to store the response to the message
+ *
+ * @return the number of bytes stored in the response
+ */
+int process_message(char *message, int message_length, char *response)
+{
+	
+	if(message_length < 2)
+		return -1;
+
+
+	char command = message[0];
+
+	//speed command
+	if(command == 0x01)
+	{
+		fprintf(stderr, "SPEED COMMAND RECEIVED\n");
+		int speed = message[1];
+		softPwmWrite(MOTOR_CONTROLLER_SPEED_PIN, speed);
+
+		int dirA = message[2] > 0 ? HIGH : LOW;
+		int dirB = message[3] > 0 ? HIGH : LOW;
+
+		digitalWrite(MOTOR_CONTROLLER_DXA_PIN, dirA);
+		digitalWrite(MOTOR_CONTROLLER_DXB_PIN, dirB);
+	}
+
+	//servo control
+	else if(command == 0x02)
+	{
+		fprintf(stderr, "SERVO");
+		int steer = message[1];
+		fprintf(stderr, "STEEP %d\n", steer);
+		softPwmWrite(SERVO_PWN_PIN, steer);
+	}
+
+	else
+	{
+		fprintf(stderr, "EKLSE %d", command);
+	}
+
+	int i = 0;
+	for(i; i < message_length; i++)
+	{
+		char c = message[i];
+		// for now just echo the message back
+		response[i] = c;
+	}
+	return message_length;
+}
+
+
+
+void initPins()
+{
+	if(wiringPiSetup() == -1)
+		exit(1);
+
+	int pins[] = {
+		MOTOR_CONTROLLER_SPEED_PIN,
+		MOTOR_CONTROLLER_DXA_PIN,
+		MOTOR_CONTROLLER_DXB_PIN,
+		SERVO_PWN_PIN
+	};
+
+
+	int i;
+	int size = sizeof(pins) / sizeof(int);
+	for(i = 0; i < size; i++)
+	{
+		int pin = pins[i];
+		pinMode(pin, OUTPUT);
+	}
+
+
+	softPwmCreate(MOTOR_CONTROLLER_SPEED_PIN, 0, 100);
+	softPwmCreate(SERVO_PWN_PIN, 0, 100);
+
+	digitalWrite(MOTOR_CONTROLLER_DXA_PIN, LOW);
+	digitalWrite(MOTOR_CONTROLLER_DXB_PIN, LOW);
+}
 
 
 /**
@@ -91,44 +187,24 @@ int receive_message(int socket, char *buffer, struct sockaddr *client)
 }
 
 
-/**
- * Handles messages received from the socket by reading the message values and
- * executing functions depending on the values.
- *
- * @param message the data received from the incoming socket
- * @param message_length the number of bytes in the message parameter
- * @param response the location to store the response to the message
- *
- * @return the number of bytes stored in the response
- */
-int process_message(char *message, int message_length, char *response)
-{
-	//TODO
-	int i = 0;
-	for(i; i < message_length; i++)
-	{
-		char c = message[i];
-		// for now just echo the message back
-		response[i] = c;
-	}
-
-	return message_length;
-}
-
-
 
 int main(int argc, char *argv[])
 {
+	fprintf(stderr, "starting");
+
 	if (argc != 2)
 	{
 		fprintf(stderr, "USAGE: %s <port>\n", argv[0]);
 		exit(1);
 	}
 
+	initPins();
+	fprintf(stderr, "inti pins");
 
 	//setup the incoming socket
 	int port = atoi(argv[1]);
 	int socket = setup_incoming_socket(port);
+	fprintf(stderr, "socket ready");
 
 	struct sockaddr_in client;
 	char buffer[BUFFER_SIZE], process[BUFFER_SIZE];
@@ -137,17 +213,20 @@ int main(int argc, char *argv[])
 	/* Run until cancelled */
 	while (1)
 	{
+		fprintf(stderr, "Waiting\n");
 		received = receive_message(socket, buffer, (struct sockaddr *) &client);
+		fprintf(stderr, "received\n");
 		process_len = process_message(buffer, received, process);
 
 		int size = sizeof(client);
 		int sent = sendto(socket, buffer, received, 0, (struct sockaddr *) &client, size);
 
-		/* Send the message back to client */
+		// Send the message back to client
 		if (sent != received)
 		{
 			errorExit("Could not respond to client");
 		}
+		fprintf(stderr, "RESPONDED WITH %d", sent);
 	}
 
 	return 0;
