@@ -1,3 +1,5 @@
+android/bin/*
+android/gen/*
 ./**/bin/*
 ./**/gen/*
 android/local.properties

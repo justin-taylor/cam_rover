@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    >
+
+    <EditText 
+
+        android:id="@+id/ip_address_field"
+        style="@style/activity_main_edit_text"
+        android:hint="@string/ip_address_field_hint"
+        />
+
+
+    <EditText 
+        android:id="@+id/port_field"
+        style="@style/activity_main_edit_text"
+        android:hint="@string/port_field_hint"
+        />
+
+    <Button 
+        android:id="@+id/connect_button"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:textSize="14sp"
+        android:text="@string/connect_button"
+        />
+
+</LinearLayout>
+

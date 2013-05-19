@@ -1,4 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">HomeActvitiy</string>
+    <string name="app_name">Cam Rover</string>
+    <string name="ip_address_field_hint">IP Address</string>
+    <string name="port_field_hint">Port</string>
+    <string name="connect_button">Connect</string>
 </resources>
