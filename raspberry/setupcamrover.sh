@@ -6,7 +6,7 @@ sudo service udhcpd start
 
 #start server
 cd /home/pi/cam_rover/raspberry/bin
-sudo ./main 9300 #2>&1 > /var/log/cam_server.log &
+sudo ./main 9300 2>&1 > /var/log/cam_server.log &
 
 #start camera
 cd /home/pi/webcam/
