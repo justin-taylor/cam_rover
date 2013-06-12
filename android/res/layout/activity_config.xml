@@ -6,10 +6,10 @@
     >
 
     <EditText 
-
         android:id="@+id/ip_address_field"
         style="@style/activity_main_edit_text"
         android:hint="@string/ip_address_field_hint"
+        android:phoneNumber="true"
         />
 
 
@@ -17,6 +17,7 @@
         android:id="@+id/port_field"
         style="@style/activity_main_edit_text"
         android:hint="@string/port_field_hint"
+        android:phoneNumber="true"
         />
 
     <Button 
