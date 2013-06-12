@@ -26,6 +26,21 @@
 #define MOTOR_CONTROLLER_DXB_PIN 9 //physical pin 5
 #define SERVO_PWN_PIN 0 //physical pin 11
 
+
+/**
+ * Prints the char[] to the console for logging
+ */
+void printBytes(char* message, int size)
+{
+	int i;
+	for(i = 0; i < size; i++)
+	{
+		fprintf(stderr, "%d:", message[i]);
+	}
+}
+
+
+
 /**
  * Handles messages received from the socket by reading the message values and
  * executing functions depending on the values.
@@ -42,13 +57,11 @@ int process_message(char *message, int message_length, char *response)
 	if(message_length < 2)
 		return -1;
 
-
 	char command = message[0];
 
-	//speed command
+	//rover command
 	if(command == 0x01)
 	{
-		fprintf(stderr, "SPEED COMMAND RECEIVED\n");
 		int speed = message[1];
 		softPwmWrite(MOTOR_CONTROLLER_SPEED_PIN, speed);
 
@@ -57,20 +70,14 @@ int process_message(char *message, int message_length, char *response)
 
 		digitalWrite(MOTOR_CONTROLLER_DXA_PIN, dirA);
 		digitalWrite(MOTOR_CONTROLLER_DXB_PIN, dirB);
-	}
 
-	//servo control
-	else if(command == 0x02)
-	{
-		fprintf(stderr, "SERVO");
-		int steer = message[1];
-		fprintf(stderr, "STEEP %d\n", steer);
+		int steer = message[4];
 		softPwmWrite(SERVO_PWN_PIN, steer);
 	}
 
 	else
 	{
-		fprintf(stderr, "EKLSE %d", command);
+		fprintf(stderr, "ELSE %d", command);
 	}
 
 	int i = 0;
@@ -123,7 +130,7 @@ void initPins()
 void errorExit(char *errorMessage)
 {
 	perror(errorMessage);
-	exit(1);
+	/*exit(1);*/
 }
 
 
@@ -206,27 +213,36 @@ int main(int argc, char *argv[])
 	int socket = setup_incoming_socket(port);
 	fprintf(stderr, "socket ready");
 
+	// declare the variables needed for receiving and sending messages
 	struct sockaddr_in client;
 	char buffer[BUFFER_SIZE], process[BUFFER_SIZE];
-	int received, process_len;
+	unsigned int received, processlen;
+	unsigned int clientlen = sizeof(client);
 
 	/* Run until cancelled */
 	while (1)
 	{
-		fprintf(stderr, "Waiting\n");
-		received = receive_message(socket, buffer, (struct sockaddr *) &client);
+		// Read data from the client
+		received = recvfrom(socket, buffer, BUFFER_SIZE, 0, (struct sockaddr *) &client, &clientlen);
+		if (received  < 0)
+		{
+			errorExit("Failed to receive message");
+		}	
 		fprintf(stderr, "received\n");
-		process_len = process_message(buffer, received, process);
 
-		int size = sizeof(client);
-		int sent = sendto(socket, buffer, received, 0, (struct sockaddr *) &client, size);
+		// log the bytes
+		printBytes(buffer, received);
 
-		// Send the message back to client
-		if (sent != received)
+		// handle the message
+		processlen = process_message(buffer, received, process);
+
+		// Send a response back to client
+		int sent = sendto(socket, process, processlen, 0, (struct sockaddr *) &client, clientlen);
+		if (sent != processlen)
 		{
 			errorExit("Could not respond to client");
 		}
-		fprintf(stderr, "RESPONDED WITH %d", sent);
+		fprintf(stderr, "RESPONDED WITH %d\n", sent);
 	}
 
 	return 0;
