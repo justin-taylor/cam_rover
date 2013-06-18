@@ -19,7 +19,7 @@ public class CamRover
     private static final byte MAXIMUM_SPEED = 25;
     private static final byte NEUTRAL_SPEED = 12;
 
-    private static final byte STEER_STRAIGHT_VALUE = 10;
+    private static final byte STEER_STRAIGHT_VALUE = 14;
 
     private Engine _communicationEngine;
 
@@ -93,10 +93,16 @@ public class CamRover
         msg[2] = (byte) dirA;
         msg[3] = (byte) dirB;
 
-        val = steer;
-        //TODO modify val to work with the proper pwm values
+        if(steer > 5)
+        {
+            steer = 5;
+        }
+        if(steer < -5)
+        {
+            steer = -5;
+        }
+        val = STEER_STRAIGHT_VALUE + steer;
         msg[4] = (byte) val;
-
 
         _communicationEngine.write(msg);
     }

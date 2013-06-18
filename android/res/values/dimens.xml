@@ -7,7 +7,7 @@
         <item name="android:textSize">14sp</item>
     </style>
 
-    <dimen name="joystick_size">100dip</dimen>
+    <dimen name="joystick_size">200dip</dimen>
     <dimen name="joystick_padding">17dip</dimen>
 
 </resources>

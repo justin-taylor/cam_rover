@@ -5,7 +5,11 @@
     android:layout_height="match_parent"
     >
 
-    <!-- TODO Add the video stream view -->
+    <org.rovertech.mjpgstreamer.MjpegView
+        android:id="@+id/video_stream"
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent"
+    />
 
 
     <com.MobileAnarchy.Android.Widgets.Joystick.JoystickView

@@ -19,12 +19,15 @@ implements OnClickListener
     private static final String SETTINGS_PREFERENCES = "org.rovertech.activity.ConfigActivity.SETTINGS_PREFERENCES";
     private static final String IP_ADDRESS_SETTING = "org.rovertech.activity.ConfigActivity.IP_ADDRESS_SETTING";
     private static final String PORT_SETTING = "org.rovertech.activity.ConfigActivity.PORT_SETTING";
+    private static final String VIDEO_PORT_SETTING = "org.rovertech.activity.ConfigActivity.VIDEO_PORT_SETTING";
 
     private static final String DEFAULT_IP_ADDRESS = "192.168.42.1";
     private static final int DEFAULT_PORT = 9300;
+    private static final int DEFAULT_VIDEO_PORT = 8080;
 
     EditText _ipAddressField;
     EditText _portField;
+    EditText _videoPortField;
 
 
     /** Called when the activity is first created. */
@@ -36,6 +39,7 @@ implements OnClickListener
 
         _ipAddressField = (EditText) findViewById(R.id.ip_address_field);
         _portField = (EditText) findViewById(R.id.port_field);
+        _videoPortField = (EditText) findViewById(R.id.video_port_field);
 
         Button button = (Button) findViewById(R.id.connect_button);
         button.setOnClickListener(this);
@@ -72,10 +76,12 @@ implements OnClickListener
     {
         String ip = _ipAddressField.getText().toString();
         int port = Integer.parseInt(_portField.getText().toString());
+        int vidPort = Integer.parseInt(_videoPortField.getText().toString());
 
         Intent intent = new Intent(this, ControllerActivity.class);
         intent.putExtra(ControllerActivity.IP_ADDRESS_EXTRA, ip);
         intent.putExtra(ControllerActivity.PORT_EXTRA, port);
+        intent.putExtra(ControllerActivity.VIDEO_PORT_EXTRA, vidPort);
         startActivity(intent);
     }
 
@@ -98,9 +104,11 @@ implements OnClickListener
 
         String ip = prefs.getString(IP_ADDRESS_SETTING, DEFAULT_IP_ADDRESS);
         int port = prefs.getInt(PORT_SETTING, DEFAULT_PORT);
+        int vidport = prefs.getInt(VIDEO_PORT_SETTING, DEFAULT_VIDEO_PORT);
 
         _ipAddressField.setText(ip);
         _portField.setText(""+port);
+        _videoPortField.setText(""+vidport);
     }
 
 
@@ -114,9 +122,11 @@ implements OnClickListener
 
         String ip = _ipAddressField.getText().toString();
         int port = Integer.parseInt(_portField.getText().toString());
+        int vidPort = Integer.parseInt(_videoPortField.getText().toString());
 
         editor.putString(IP_ADDRESS_SETTING, ip);
         editor.putInt(PORT_SETTING, port);
+        editor.putInt(VIDEO_PORT_SETTING, vidPort);
 
         editor.commit();
     }

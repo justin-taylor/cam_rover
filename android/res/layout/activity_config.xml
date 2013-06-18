@@ -20,6 +20,14 @@
         android:phoneNumber="true"
         />
 
+    <EditText 
+        android:id="@+id/video_port_field"
+        style="@style/activity_main_edit_text"
+        android:hint="@string/port_field_hint"
+        android:phoneNumber="true"
+        />
+
+
     <Button 
         android:id="@+id/connect_button"
         android:layout_width="fill_parent"
