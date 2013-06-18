@@ -12,6 +12,7 @@
     />
 
 
+<!--
     <com.MobileAnarchy.Android.Widgets.Joystick.JoystickView
         android:id="@+id/steering_joystick"
         android:layout_width="@dimen/joystick_size"
@@ -34,6 +35,14 @@
         android:layout_marginRight="@dimen/joystick_padding"
         />
 
+-->
 
+
+    <com.MobileAnarchy.Android.Widgets.Joystick.DualJoystickView
+        android:id="@+id/joysticks"
+        android:layout_height="175dip"
+        android:layout_width="fill_parent"
+        android:layout_alignParentBottom="true"
+        />
 
 </RelativeLayout>

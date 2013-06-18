@@ -12,6 +12,7 @@ import android.os.AsyncTask;
 import android.util.Log;
 import android.widget.Toast;
 
+import com.MobileAnarchy.Android.Widgets.Joystick.DualJoystickView;
 import com.MobileAnarchy.Android.Widgets.Joystick.JoystickClickedListener;
 import com.MobileAnarchy.Android.Widgets.Joystick.JoystickMovedListener;
 import com.MobileAnarchy.Android.Widgets.Joystick.JoystickView;
@@ -68,11 +69,14 @@ extends Activity implements JoystickMovedListener, JoystickClickedListener
 
         setContentView(R.layout.activity_controller);
 
-        _roverJoystick = (JoystickView) findViewById(R.id.steering_joystick);
+        DualJoystickView dualJoystick = (DualJoystickView) findViewById(R.id.joysticks);
+        _roverJoystick = dualJoystick.leftJoystick();
+        _cameraJoystick = dualJoystick.rightJoystick();
+
+
         _roverJoystick.setOnJoystickMovedListener(this);
         _roverJoystick.setOnJoystickClickedListener(this);
         
-        _cameraJoystick = (JoystickView) findViewById(R.id.camera_joystick);
         _cameraJoystick.setOnJoystickMovedListener(this);
         _cameraJoystick.setOnJoystickClickedListener(this);
 
@@ -237,14 +241,6 @@ extends Activity implements JoystickMovedListener, JoystickClickedListener
         }
     }
  
-
-    private String cameraHtml()
-    {
-        return 
-            "<img src='http://192.168.42.1:8080/?action=stream' height='300px' widt='200px' />"
-        ;
-    }
-
 
 
     public class DoRead extends AsyncTask<String, Void, MjpegInputStream> {
